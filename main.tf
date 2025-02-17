@@ -149,8 +149,10 @@ resource "aws_instance" "roger_web" {
   subnet_id = aws_subnet.roger_public_subnet[count.index].id
   key_name = var.aws_key_pair
   vpc_security_group_ids = [aws_security_group.roger_web_sg.id]
+  user_data = templatefile("${path.module}modules/web_app/init-script.sh",{file_content = "webapp"
+  }) # Path to your init script
   tags ={
-    Name = "roger_web_${count.index}"
+    Name = "${local.name_prefix}-roger_web" #"roger_web_${count.index}"
   }
 }
 #create elastic IP for EC2
@@ -161,4 +163,18 @@ resource "aws_eip" "roger_web_eip" {
   tags = {
     Name = "roger_web_eip_${count.index}"
   }
+}
+
+#link to web_app module
+locals {
+  name_prefix = "roger" # provide your name prefix
+}
+
+module "web_app" {
+  source = "./modules/web_app"
+  name_prefix = local.name_prefix
+  instance_id = aws_instance.roger_web #pass existing EC2 instance
+  vpc_id            = aws_vpc.roger_vpc.id
+  public_subnet_ids = aws_subnet.roger_public_subnet[*].id
+  private_subnet_ids = aws_subnet.roger_private_subnet[*].id
 }

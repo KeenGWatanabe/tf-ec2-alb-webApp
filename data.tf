@@ -12,3 +12,4 @@ locals {
 output "my_ip" {
   value = local.my_public_ip
 }
+

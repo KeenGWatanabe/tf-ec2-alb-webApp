@@ -12,7 +12,7 @@ output "aws_iam_policy" {
   description = "aws_iam_policy_arn"
   value = aws_iam_policy.ec2_access_policy.arn  
 }
-output "alb_dns_name" {
-  description = "DNS name of ALB"
-  value = module.web_app.alb.dns_name
-}
+# output "alb_dns_name" {
+#   description = "DNS name of ALB"
+#   value = module.web_app.alb_dns_name
+# }

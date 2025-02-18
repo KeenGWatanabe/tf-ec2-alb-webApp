@@ -1,20 +1,3 @@
-terraform {
- required_providers {
-   aws = {
-     source = "hashicorp/aws"
-     version = "5.83.1"
-   }
- }
- required_version = ">= 1.1.5"
-}
-
-provider "aws" {
-  region = var.aws_region
-}
-
-data "aws_availability_zones" "available" {
-  state = "available"
-}
 #1 vpc
 resource "aws_vpc" "roger_vpc" {
   cidr_block = var.vpc_cidr_block
@@ -23,7 +6,7 @@ resource "aws_vpc" "roger_vpc" {
     Name = "roger_vpc"
   }
 }
-#2 igw
+#2 igw create with #1 "roger_vpc"
 resource "aws_internet_gateway" "roger_igw" {
   vpc_id = aws_vpc.roger_vpc.id
   tags = {
@@ -32,40 +15,40 @@ resource "aws_internet_gateway" "roger_igw" {
 }
 #3 public subnet
 resource "aws_subnet" "roger_public_subnet" {
-  count = var.subnet_count.public
-  vpc_id = aws_vpc.roger_vpc.id 
+  count      = var.subnet_count.public
+  vpc_id     = aws_vpc.roger_vpc.id 
   cidr_block = var.public_subnet_cidr[count.index] 
   availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {
     Name = "roger_public_subnet_${count.index}"
   }
 }
-#private subnet
+#3 private subnet
 resource "aws_subnet" "roger_private_subnet" {
-  count = var.subnet_count.private
-  vpc_id = aws_vpc.roger_vpc.id 
+  count      = var.subnet_count.private
+  vpc_id     = aws_vpc.roger_vpc.id 
   cidr_block = var.private_subnet_cidr[count.index] 
   availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {
     Name = "roger_private_subnet_${count.index}"
   }
 }
-#4 public rtb
-resource "aws_route_table" "roger_public_rt" {
-  vpc_id = aws_vpc.roger_vpc.id
+#4 public rtb (#vpc,#igw)
+resource "aws_route_table" "roger_public_rtb" {
+  vpc_id       = aws_vpc.roger_vpc.id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.roger_igw.id
   }
 }
-
+#4 rtb assoc (#public rtb, #3 subnet)
 resource "aws_route_table_association" "public" {
-  count = var.subnet_count.public
-  route_table_id = aws_route_table.roger_public_rt.id
-  subnet_id = aws_subnet.roger_public_subnet[count.index].id
+  count          = var.subnet_count.public
+  route_table_id = aws_route_table.roger_public_rtb.id
+  subnet_id      = aws_subnet.roger_public_subnet[count.index].id
 }
 
-#private rtb
+#4 private rtb
 resource "aws_route_table" "roger_private_rt" {
   vpc_id = aws_vpc.roger_vpc.id
 }

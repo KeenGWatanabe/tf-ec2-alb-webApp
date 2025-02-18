@@ -1,3 +1,7 @@
+#3 subnets
+data "aws_availability_zones" "available" {
+  state = "available"
+}
 # Fetching my_ip code
 data "http" "my_public_ip" {
   url = "https://ifconfig.me/ip" # or use any other service that returns your public IP

@@ -170,11 +170,11 @@ resource "aws_eip" "roger_web_eip" {
 module "web_app" {
   source                = "./modules/web_app"
   vpc_id                = aws_vpc.roger_vpc.id
-  ami_id              = data.aws_ami.amazon_linux.id
+  ami_id                = data.aws_ami.amazon_linux.id
   public_subnet_ids     = aws_subnet.roger_public_subnet[*].id
   alb_target_group_arn  = aws_lb_target_group.app_tg.arn #errr app_tg
   web_app_sg_id         = aws_security_group.roger_ec2_sg.id
-  instance_type         = aws_instance.roger_web[*].id #roger_web_sg
+  instance_type         = "t2.micro" #valid instance type
   key_name              = "roger_linux_kp"
   
 }

@@ -17,7 +17,7 @@ resource "aws_instance" "web_app" {
   vpc_security_group_ids = [var.web_app_sg_id]
   key_name               = var.key_name
   user_data              = data.template_file.init_script.rendered
-
+  
   tags = {
     Name = "web-app-instance"
   }

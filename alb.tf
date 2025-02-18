@@ -27,7 +27,7 @@ resource "aws_security_group" "alb_sg" {
 }
 # Application Load Balancer
 resource "aws_lb" "app_lb" {
-  name               = "app-lb"
+  name               = "roger-app-lb"
   internal           = false  # internet-facing
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]

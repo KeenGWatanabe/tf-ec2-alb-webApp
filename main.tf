@@ -16,7 +16,7 @@ resource "aws_internet_gateway" "roger_igw" {
 #3 public subnet
 resource "aws_subnet" "roger_public_subnet" {
   count      = var.subnet_count.public #var.tf/"subnet_count"/default public=2
-  vpc_id     = aws_vpc.roger_vpc.id  #resource.name_tag.result(id)
+  vpc_id     = aws_vpc.roger_vpc.id  #"resource"."name".result(id)
   cidr_block = var.public_subnet_cidr[count.index] 
   availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {
@@ -44,8 +44,8 @@ resource "aws_route_table" "roger_public_rtb" {
 #4 rtb assoc (#public rtb, #3 subnet)
 resource "aws_route_table_association" "public" {
   count          = var.subnet_count.public #var "subnet_count" default public=2
-  route_table_id = aws_route_table.roger_public_rtb.id #resource.nameTag.result
-  subnet_id      = aws_subnet.roger_public_subnet[count.index].id #resource.nameTag.result
+  route_table_id = aws_route_table.roger_public_rtb.id #resource."name".result
+  subnet_id      = aws_subnet.roger_public_subnet[count.index].id #resource."name".result
 }
 
 #4 private rtb
@@ -62,7 +62,7 @@ resource "aws_route_table_association" "private" {
 resource "aws_security_group" "roger_web_sg" {
   name = "roger_web_sg"
   description = "security group for web servers"
-  vpc_id = aws_vpc.roger_vpc.id #resource.nameTag.result
+  vpc_id = aws_vpc.roger_vpc.id #resource."name".result
 
   ingress {
     description = "allow SSH from my computer"
@@ -147,16 +147,18 @@ resource "aws_eip" "roger_web_eip" {
     Name = "roger_web_eip_${count.index}"
   }
 }
-
-
-
+#building the web_app"
 module "web_app" {
   source                = "./modules/web_app"
-  vpc_id                = aws_vpc.roger_vpc.id
+  #1 vpc setup
+  vpc_id                = aws_vpc.roger_vpc.id 
   ami_id                = data.aws_ami.amazon_linux.id
-  public_subnet_ids     = aws_subnet.roger_public_subnet[*].id
-  alb_target_group_arn  = aws_lb_target_group.app_tg.arn #errr app_tg
-  web_app_sg_id         = aws_security_group.roger_ec2_sg.id
+  public_subnet_ids     = aws_subnet.roger_public_subnet[*].id #3 pub subnet
+  #alb setup ref alb.tf-ln40
+  alb_target_group_arn  = aws_lb_target_group.app_tg.arn #
+  #security group setup
+  web_app_sg_id         = aws_security_group.alb_sg.id #port 80,443
+  
   instance_type         = "t2.micro" #valid instance type
   key_name              = "roger_linux_kp"
   

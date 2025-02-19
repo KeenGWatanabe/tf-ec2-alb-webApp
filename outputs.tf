@@ -9,3 +9,8 @@ output "web_public_dns" {
   depends_on = [aws_eip.roger_web_eip]
 }
 
+
+# Output the my_ip value
+output "my_ip" {
+  value = local.my_public_ip
+}

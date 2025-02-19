@@ -15,8 +15,8 @@ resource "aws_internet_gateway" "roger_igw" {
 }
 #3 public subnet
 resource "aws_subnet" "roger_public_subnet" {
-  count      = var.subnet_count.public
-  vpc_id     = aws_vpc.roger_vpc.id 
+  count      = var.subnet_count.public #var.tf/"subnet_count"/default public=2
+  vpc_id     = aws_vpc.roger_vpc.id  #resource.name_tag.result(id)
   cidr_block = var.public_subnet_cidr[count.index] 
   availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {
@@ -25,9 +25,9 @@ resource "aws_subnet" "roger_public_subnet" {
 }
 #3 private subnet
 resource "aws_subnet" "roger_private_subnet" {
-  count      = var.subnet_count.private
+  count      = var.subnet_count.private #var "subnet_count" default private=2
   vpc_id     = aws_vpc.roger_vpc.id 
-  cidr_block = var.private_subnet_cidr[count.index] 
+  cidr_block = var.private_subnet_cidr[count.index] #var "pte_subnet_cidr"
   availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {
     Name = "roger_private_subnet_${count.index}"
@@ -43,33 +43,33 @@ resource "aws_route_table" "roger_public_rtb" {
 }
 #4 rtb assoc (#public rtb, #3 subnet)
 resource "aws_route_table_association" "public" {
-  count          = var.subnet_count.public
-  route_table_id = aws_route_table.roger_public_rtb.id
-  subnet_id      = aws_subnet.roger_public_subnet[count.index].id
+  count          = var.subnet_count.public #var "subnet_count" default public=2
+  route_table_id = aws_route_table.roger_public_rtb.id #resource.nameTag.result
+  subnet_id      = aws_subnet.roger_public_subnet[count.index].id #resource.nameTag.result
 }
 
 #4 private rtb
-resource "aws_route_table" "roger_private_rt" {
+resource "aws_route_table" "roger_private_rtb" {
   vpc_id = aws_vpc.roger_vpc.id
 }
-
+#4 rtb assoc (#private rtb, #3 subnet)
 resource "aws_route_table_association" "private" {
   count = var.subnet_count.private
-  route_table_id = aws_route_table.roger_private_rt.id
+  route_table_id = aws_route_table.roger_private_rtb.id
   subnet_id = aws_subnet.roger_private_subnet[count.index].id
 }
-#5 EC2 security grp
+#5 EC2 security grp-web app
 resource "aws_security_group" "roger_web_sg" {
   name = "roger_web_sg"
   description = "security group for web servers"
-  vpc_id = aws_vpc.roger_vpc.id
+  vpc_id = aws_vpc.roger_vpc.id #resource.nameTag.result
 
   ingress {
     description = "allow SSH from my computer"
     from_port   = "22"
     to_port     = "22"
     protocol    = "tcp"
-    cidr_blocks = [local.my_public_ip] #fetching my_ip code
+    cidr_blocks = [local.my_public_ip] #data.tf/fetching my_ip code
    
   }
   ingress {
@@ -90,7 +90,7 @@ resource "aws_security_group" "roger_web_sg" {
     Name = "roger_web_sg"
   }
 }
-#ec2 security grp
+#6 ec2 security grp-ec2
 resource "aws_security_group" "roger_ec2_sg" {
   name = "roger_ec2_sg"
   description = "security group for ec2"

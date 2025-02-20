@@ -1,12 +1,4 @@
 
-# User data script to install and start HTTPD
-data "template_file" "init_script" {
-  template = file("${path.module}/init-script.sh")
-  
-  vars = {
-    file_content = "Hello, World! This is the web app content." # Replace with your desired content
-  }
-}
 
 
 # EC2 instance for the web application
@@ -16,7 +8,9 @@ resource "aws_instance" "web_app" {
   subnet_id              = var.public_subnet_ids[0] # Use the first public subnet
   vpc_security_group_ids = [var.web_app_sg_id]
   key_name               = var.key_name
-  user_data              = data.template_file.init_script.rendered
+  user_data              = templatefile("${path.module}/init-script.sh", {
+    file_content = "webapp"
+  })
   
   tags = {
     Name = "web-app-instance"

@@ -14,3 +14,6 @@ output "web_public_dns" {
 output "my_ip" {
   value = local.my_public_ip
 }
+# output "application_http_url" {
+#   value = "http://${module.alb.dns_name}"
+# }

@@ -160,7 +160,7 @@ module "web_app" {
   web_app_sg_id         = aws_security_group.alb_sg.id #port 80,443
   
   instance_type         = "t2.micro" #valid instance type
-  key_name              = "roger_linux_kp"
+  key_name              = "rger_kp"
   
 }
 
